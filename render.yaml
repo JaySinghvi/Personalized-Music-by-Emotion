@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: streamlit-webcam-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run music.py --server.port=8000 --server.address=0.0.0.0
