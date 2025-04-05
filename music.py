@@ -11,6 +11,9 @@ import webbrowser
 model = load_model("model.h5")
 label = np.load("lables.npy")
 
+if label is None or len(label) == 0:
+    raise ValueError("Labels not loaded properly. Check lables.npy file.")
+
 #holistic function takes in the frame and returns all the key facial points and hand gestures
 holistic = mp.solutions.holistic
 hands = mp.solutions.hands
@@ -65,8 +68,13 @@ class EmotionProcessor:
                         lst.append(0.0)
 
                 lst = np.array(lst).reshape(1, -1)
-                pred = label[np.argmax(model.predict(lst))] #to find the max index and convert to string
-
+                try:
+                    prediction = model.predict(lst)
+                    pred_idx = int(np.argmax(prediction))
+                    pred = str(label[pred_idx])
+                except Exception as e:
+                    print("Prediction failed:", e)
+                    pred = "Unknown"
                 print(pred)
                 cv2.putText(frm, pred, (50, 50), cv2.FONT_ITALIC, 1, (255, 0, 0), 2)
                 st.session_state["emotion"] = pred
