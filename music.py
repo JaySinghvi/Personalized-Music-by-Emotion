@@ -80,8 +80,8 @@ lang = st.text_input("Language")
 singer = st.text_input("singer")
 
 if lang and singer and st.session_state["run"] != "false":
-    webrtc_streamer(key = "key", desired_playing_state = True, video_processor_factory= EmotionProcessor)
-
+    webrtc_streamer(key = "key", mode = WebRtcMode.SENDRECV, desired_playing_state = True, async_processing = True, video_processor_factory= EmotionProcessor)
+    
 btn = st.button("Recommend me songs") #recommending songs from youtube using emotion recognition
 #when button is pressed, streamlit refreshes all the script so we need to save the pred in a file locally and import it later
 
