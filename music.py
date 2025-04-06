@@ -31,12 +31,14 @@ if not st.session_state["emotion"]:
 else:
     st.session_state["run"] = "false"
 
+expected_features = 936 + 42 + 42
 
-class EmotionProcessor:
+class EmotionProcessor(VideoProcessorBase):
     def __init__(self):
         self.model = model
+        self.label = label
 
-    def recv(self, frame):
+    def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         try:
             frm = frame.to_ndarray(format = "bgr24")
 
@@ -68,14 +70,19 @@ class EmotionProcessor:
                         lst.append(0.0)
 
                 lst = np.array(lst).reshape(1, -1)
-                try:
-                    prediction = model.predict(lst)
-                    pred_idx = int(np.argmax(prediction))
-                    pred = str(label[pred_idx])
-                except Exception as e:
-                    print("Prediction failed:", e)
+                if lst.shape[1] != expected_features:
+                    print("Unexpected feature vector length:", lst.shape[1])
                     pred = "Unknown"
-                print(pred)
+
+                else:
+                    try:
+                        prediction = self.model.predict(lst)
+                        pred_idx = int(np.argmax(prediction))
+                        pred = str(self.label[pred_idx])
+                    except Exception as e:
+                        print("Prediction failed:", e)
+                        pred = "Unknown"
+
                 cv2.putText(frm, pred, (50, 50), cv2.FONT_ITALIC, 1, (255, 0, 0), 2)
                 st.session_state["emotion"] = pred
 
@@ -88,7 +95,11 @@ class EmotionProcessor:
         
         except Exception as e:
             print("Error:", e)
-            return av.VideoFrame.from_ndarray(frm, format = "bgr24")
+            if 'frm' in locals():
+                return av.VideoFrame.from_ndarray(frm, format="bgr24")
+            else:
+                blank = np.zeros((480, 640, 3), dtype=np.uint8)
+                return av.VideoFrame.from_ndarray(blank, format="bgr24")
 
 st.title("Sentiment-Driven Music Recommender")
 lang = st.text_input("Language")
@@ -105,7 +116,7 @@ if btn:
         st.warning("Please let me capture your emotion to recommend songs")
         st.session_state["run"] = "true"
     else:
-        search_query = webbrowser.open(f'https://www.youtube.com/results?search_query={lang}+{st.session_state['emotion']}+songs+{singer}')
+        search_query = f"https://www.youtube.com/results?search_query={lang}+{st.session_state['emotion']}+songs+{singer}"
         st.markdown(f"[Click here to view your recommendations]({search_query})", unsafe_allow_html=True)
         st.session_state["emotion"] = ""
         st.session_state["run"] = "false"
