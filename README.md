@@ -35,7 +35,11 @@ This project blends computer vision with sentiment analysis to recommend music b
 ## ▶️ How to Run
 
 ### 📁 Clone the Repository
+`git clone https://github.com/JaySinghvi/Sentiment-Driven-Music-Recommender.git
+cd Sentiment-Driven-Music-Recommender`
 
-```bash
-git clone https://github.com/JaySinghvi/Sentiment-Driven-Music-Recommender.git
-cd Sentiment-Driven-Music-Recommender
+### 📦 Install Required Packages
+`pip install -r requirements.txt`
+
+### 🎬 Run the App
+`streamlit run app.py`
